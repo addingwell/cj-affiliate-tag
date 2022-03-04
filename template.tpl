@@ -101,7 +101,14 @@ function encodeUri(value) {
 switch (eventModel.event_name) {
   case 'page_view':
     const parsedUrl = parseUrl(eventModel.page_location);
-    const value = parsedUrl && parsedUrl.searchParams ? parsedUrl.searchParams.cjevent : '';
+    let value;
+    if (parsedUrl && parsedUrl.searchParams) {
+      for (let param in parsedUrl.searchParams) {
+        if (param.toLowerCase() === 'cjevent') {
+          value = parsedUrl.searchParams[param];
+        }
+      }
+    }
     if (value) {
         const options = {
             domain: data.domain,
@@ -118,39 +125,51 @@ switch (eventModel.event_name) {
     const requestHeaders = {method: 'GET'};
     const cjeCookie = getCookieValues('cje');
 
-    let urlParams = [
-        'cid=' + data.cid,
-        'type=' + data.actionId,
-        'method=S2S',
-        'signature=' + data.signature,
-        cjeCookie ? 'cjevent=' + cjeCookie[0] : '',
-        'eventTime=',
-        'oid=' + encodeUri(eventModel.transaction_id),
-        'currency=' + eventModel.currency,
-        'coupon=' + encodeUri(eventModel.coupon),
-        'discount=' + eventModel.discount || 0,
-        'amount=' + eventModel.value
-    ].join('&');
+    if (cjeCookie && cjeCookie[0]) {
+          let urlParams = [
+            'cid=' + data.cid,
+            'type=' + data.actionId,
+            'method=S2S',
+            'signature=' + data.signature,
+            'cjevent=' + cjeCookie[0],
+            'eventTime=',
+            'oid=' + encodeUri(eventModel.transaction_id),
+            'currency=' + eventModel.currency,
+            'coupon=' + encodeUri(eventModel.coupon),
+            (eventModel.discount > 0) ? 'discount=' + eventModel.discount : '',
+            'amount=' + eventModel.value
+          ].join('&');
 
-    if (eventModel.items) {
-      for (let i = 0; i < eventModel.items.length; i++) {
-        urlParams = urlParams + '&' + [
-            'ITEM' + (i + 1) + '=' + eventModel.items[i].item_id,
-            'AMT' + (i + 1) + '=' + eventModel.items[i].price || 0,
-            'QTY' + (i + 1) + '=' + eventModel.items[i].quantity,
-            'DCNT' + (i + 1) + '=' + eventModel.items[i].discount || 0
-        ].join('&');
-      }
-    }
+          if (eventModel.items) {
+            for (let i = 0; i < eventModel.items.length; i++) {
+              urlParams = urlParams + '&' + [
+                'ITEM' + (i + 1) + '=' + eventModel.items[i].item_id,
+                'AMT' + (i + 1) + '=' + eventModel.items[i].price || '0',
+                'QTY' + (i + 1) + '=' + eventModel.items[i].quantity,
+                (eventModel.items[i].discount > 0) ? 'DCNT' + (i + 1) + '=' + eventModel.items[i].discount : ''
+              ].join('&');
+            }
+          }
 
-    const url = API_ENDPOINT + '?' + urlParams;
-    sendHttpRequest(url, (statusCode, headers, body) => {
-        if (statusCode >= 200 && statusCode < 300) {
-            data.gtmOnSuccess();
+          setCookie('cje', '', {
+            domain: data.domain,
+            path: '/',
+            secure: true,
+            httpOnly: false,
+            'max-age': 10
+          }, false);
+
+          const url = API_ENDPOINT + '?' + urlParams;
+          sendHttpRequest(url, (statusCode, headers, body) => {
+            if (statusCode >= 200 && statusCode < 300) {
+                data.gtmOnSuccess();
+            } else {
+                data.gtmOnFailure();
+            }
+          }, requestHeaders, '');
         } else {
-            data.gtmOnFailure();
+          data.gtmOnSuccess();
         }
-    }, requestHeaders, '');
     break;
   default:
     data.gtmOnSuccess();
