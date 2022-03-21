@@ -59,11 +59,6 @@ ___TEMPLATE_PARAMETERS___
     "name": "signature",
     "displayName": "Signature",
     "simpleValueType": true,
-    "valueValidators": [
-      {
-        "type": "NON_EMPTY"
-      }
-    ],
     "help": "This parameter is used for an ROI call signature. A shared secret will be set up between you and CJ, and CJ will provide this value."
   },
   {
@@ -136,7 +131,7 @@ switch (eventModel.event_name) {
           'cid=' + data.cid,
           'type=' + data.actionId,
           'method=S2S',
-          'signature=' + data.signature,
+          (data.signature) ? 'signature=' + data.signature : '',
           'cjevent=' + cjeCookie[0],
           'eventTime=',
           'oid=' + encodeUri(eventModel.transaction_id),
