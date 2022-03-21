@@ -15,6 +15,8 @@
 homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
+  - sha: 224d3590da8a20f339a6f634122cda81e619ff9f
+    changeNotes: Remove signature mandatory
   - sha: fcc1beb13b14619b3556b63148bab1b257da304b
     changeNotes: Send only affiliate events
   - sha: b104c130e266d1d9fb23b6964035242e14d18d95
