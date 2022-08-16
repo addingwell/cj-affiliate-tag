@@ -16,7 +16,9 @@ jobs:
         with:
           ref: master
       - run: |
-          printf "  - sha: $(git rev-parse HEAD)\n    changeNotes: ${{ github.event.release.name }}\n" >> metadata.yaml
+          sed "/versions:/a\  - sha: $(git rev-parse HEAD)\n    changeNotes: ${{ github.event.release.name }}\n" metadata.yaml > metadata_tmp.yaml
+          cat metadata_tmp.yaml > metadata.yaml
+          rm metadata_tmp.yaml
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
