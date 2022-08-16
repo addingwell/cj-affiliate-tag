@@ -27,3 +27,5 @@ versions:
     changeNotes: Fix discount values, url params insensitive, cjevent only and cookie deletion
   - sha: 4e55beb540abbbc25b75f03161186dce0ce906fd
     changeNotes: Initial commit
+  - sha: 150cf28497ca2dacdc20a86bf69195f54a56b026
+    changeNotes: Add advanced parameters, to customize event name, and cookie expiration time
