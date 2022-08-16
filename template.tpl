@@ -78,6 +78,40 @@ ___TEMPLATE_PARAMETERS___
     "name": "clearCookie",
     "checkboxText": "Clear CJ affiliate cookie on conversion",
     "simpleValueType": true
+  },
+  {
+    "type": "GROUP",
+    "name": "advancedParameters",
+    "displayName": "Advanced Parameters",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "TEXT",
+        "name": "pageViewEvent",
+        "displayName": "Page view event name",
+        "simpleValueType": true,
+        "defaultValue": "page_view"
+      },
+      {
+        "type": "TEXT",
+        "name": "purchaseEvent",
+        "displayName": "Purchase event name",
+        "simpleValueType": true,
+        "defaultValue": "purchase"
+      },
+      {
+        "type": "TEXT",
+        "name": "cookieExpiration",
+        "displayName": "Cookie expiration in days",
+        "simpleValueType": true,
+        "defaultValue": 30,
+        "valueValidators": [
+          {
+            "type": "POSITIVE_NUMBER"
+          }
+        ]
+      }
+    ]
   }
 ]
 
@@ -94,13 +128,16 @@ const encodeUriComponent = require('encodeUriComponent');
 const eventModel = getAllEventData();
 const API_ENDPOINT = 'https://www.emjcd.com/u';
 
+const PAGE_VIEW_EVENT = data.pageViewEvent || 'page_view';
+const PURCHASE_EVENT = data.purchaseEvent || 'purchase';
+
 function encodeUri(value) {
     value = value || '';
     return encodeUriComponent(value);
 }
 
 switch (eventModel.event_name) {
-  case 'page_view':
+  case PAGE_VIEW_EVENT:
     const parsedUrl = parseUrl(eventModel.page_location);
     let value;
     if (parsedUrl && parsedUrl.searchParams) {
@@ -116,13 +153,13 @@ switch (eventModel.event_name) {
             path: '/',
             secure: true,
             httpOnly: false,
-            'max-age': 86400 * 395
+            'max-age': 86400 * (data.cookieExpiration || 395)
         };
         setCookie('cje', value, options, false);
     }
     data.gtmOnSuccess();
     break;
-  case 'purchase':
+  case PURCHASE_EVENT:
     const requestHeaders = {method: 'GET'};
     const cjeCookie = getCookieValues('cje');
 
