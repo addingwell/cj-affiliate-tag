@@ -13,7 +13,10 @@ ___INFO___
   "id": "cvt_temp_public_id",
   "version": 1,
   "securityGroups": [],
-  "categories": ["AFFILIATE_MARKETING", "ADVERTISING"],
+  "categories": [
+    "AFFILIATE_MARKETING",
+    "ADVERTISING"
+  ],
   "displayName": "CJ Affiliate",
   "brand": {
     "id": "brand_dummy",
@@ -78,6 +81,21 @@ ___TEMPLATE_PARAMETERS___
     "name": "clearCookie",
     "checkboxText": "Clear CJ affiliate cookie on conversion",
     "simpleValueType": true
+  },
+  {
+    "type": "GROUP",
+    "name": "standardParameters",
+    "displayName": "Overwrite Standard Parameters",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "TEXT",
+        "name": "purchaseAmount",
+        "displayName": "Purchase amount",
+        "simpleValueType": true,
+        "help": "Default to \"value - tax - shipping\""
+      }
+    ]
   },
   {
     "type": "GROUP",
@@ -175,7 +193,7 @@ switch (eventModel.event_name) {
           'currency=' + eventModel.currency,
           'coupon=' + encodeUri(eventModel.coupon),
           (eventModel.discount > 0) ? 'discount=' + eventModel.discount : '',
-          'amount=' + eventModel.value
+          'amount=' + data.purchaseAmount ? data.purchaseAmount : ((eventModel.value - (eventModel.tax || 0)) - (eventModel.shipping || 0))
         ].join('&');
 
         if (eventModel.items) {
@@ -375,3 +393,4 @@ scenarios: []
 ___NOTES___
 
 Created on 2/15/2022, 16:06:45
+
