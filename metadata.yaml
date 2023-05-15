@@ -15,9 +15,10 @@
 homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
+  - sha: befdeb32d4a462d5ca9ea5969c9d438b7fc19c64
+    changeNotes: Add custom parameters on conversion
   - sha: d5ca433eb11fbe701e5401df5552a3e9166b3730
     changeNotes: Allow for fully custom amount
-
   - sha: 150cf28497ca2dacdc20a86bf69195f54a56b026
     changeNotes: Add advanced parameters, to customize event name, and cookie expiration time
   - sha: d4c04fde199905448181fa841f83bd93e2a8dc55
