@@ -99,6 +99,33 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "GROUP",
+    "name": "customParameters",
+    "displayName": "Custom Parameters",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "SIMPLE_TABLE",
+        "name": "customParametersTable",
+        "displayName": "",
+        "simpleTableColumns": [
+          {
+            "defaultValue": "",
+            "displayName": "ref",
+            "name": "ref",
+            "type": "TEXT"
+          },
+          {
+            "defaultValue": "",
+            "displayName": "value",
+            "name": "value",
+            "type": "TEXT"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
     "name": "advancedParameters",
     "displayName": "Advanced Parameters",
     "groupStyle": "ZIPPY_CLOSED",
@@ -149,9 +176,9 @@ const API_ENDPOINT = 'https://www.emjcd.com/u';
 const PAGE_VIEW_EVENT = data.pageViewEvent || 'page_view';
 const PURCHASE_EVENT = data.purchaseEvent || 'purchase';
 
-function encodeUri(value) {
-    value = value || '';
-    return encodeUriComponent(value);
+function safeEncodeUriComponent(value) {
+  value = value || '';
+  return encodeUriComponent(value);
 }
 
 switch (eventModel.event_name) {
@@ -189,23 +216,40 @@ switch (eventModel.event_name) {
           (data.signature) ? 'signature=' + data.signature : '',
           'cjevent=' + cjeCookie[0],
           'eventTime=',
-          'oid=' + encodeUri(eventModel.transaction_id),
+          'oid=' + safeEncodeUriComponent(eventModel.transaction_id),
           'currency=' + eventModel.currency,
-          'coupon=' + encodeUri(eventModel.coupon),
+          'coupon=' + safeEncodeUriComponent(eventModel.coupon),
           (eventModel.discount > 0) ? 'discount=' + eventModel.discount : '',
           'amount=' + data.purchaseAmount ? data.purchaseAmount : ((eventModel.value - (eventModel.tax || 0)) - (eventModel.shipping || 0))
-        ].join('&');
+        ];
 
         if (eventModel.items) {
           for (let i = 0; i < eventModel.items.length; i++) {
-            urlParams = urlParams + '&' + [
-              'ITEM' + (i + 1) + '=' + eventModel.items[i].item_id,
-              'AMT' + (i + 1) + '=' + eventModel.items[i].price || '0',
-              'QTY' + (i + 1) + '=' + eventModel.items[i].quantity,
-              (eventModel.items[i].discount > 0) ? 'DCNT' + (i + 1) + '=' + eventModel.items[i].discount : ''
-            ].join('&');
+            urlParams.push('ITEM' + (i + 1) + '=' + eventModel.items[i].item_id);
+            urlParams.push('AMT' + (i + 1) + '=' + eventModel.items[i].price || '0');
+            urlParams.push('QTY' + (i + 1) + '=' + eventModel.items[i].quantity);
+            if (eventModel.items[i].discount > 0) {
+              urlParams.push('DCNT' + (i + 1) + '=' + eventModel.items[i].discount);
+            }
           }
         }
+
+        const includedRef = [];
+        for (let key in data.customParametersTable) {
+          const row = data.customParametersTable[key];
+          if (includedRef.indexOf(row.ref) !== -1) {
+            continue;
+          }
+
+          if (row.value === undefined) {
+            continue;
+          }
+
+          includedRef.push(row.ref);
+          urlParams.push(row.ref + '=' + safeEncodeUriComponent(row.value));
+        }
+
+        const urlParamsString = urlParams.filter((v) => v).join('&');
 
         if (data.clearCookie) {
           setCookie('cje', '', {
@@ -217,7 +261,7 @@ switch (eventModel.event_name) {
           }, false);
         }
 
-        const url = API_ENDPOINT + '?' + urlParams;
+        const url = API_ENDPOINT + '?' + urlParamsString;
         sendHttpRequest(url, (statusCode, headers, body) => {
           if (statusCode >= 200 && statusCode < 300) {
             data.gtmOnSuccess();
