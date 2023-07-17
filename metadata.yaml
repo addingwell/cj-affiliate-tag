@@ -15,6 +15,9 @@
 homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
+  - sha: fd9aa5090a9248586ec95b12a6ebade0c3a1e39e
+    changeNotes: Fix item level discount by multiplying with quantity
+
   - sha: befdeb32d4a462d5ca9ea5969c9d438b7fc19c64
     changeNotes: Add custom parameters on conversion
   - sha: d5ca433eb11fbe701e5401df5552a3e9166b3730
