@@ -229,7 +229,7 @@ switch (eventModel.event_name) {
             urlParams.push('AMT' + (i + 1) + '=' + eventModel.items[i].price || '0');
             urlParams.push('QTY' + (i + 1) + '=' + eventModel.items[i].quantity);
             if (eventModel.items[i].discount > 0) {
-              urlParams.push('DCNT' + (i + 1) + '=' + eventModel.items[i].discount);
+              urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount * (eventModel.items[i].quantity || 1)));
             }
           }
         }
