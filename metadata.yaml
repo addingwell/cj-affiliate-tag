@@ -15,6 +15,9 @@
 homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
+  - sha: 1a4b68826c05ddcf33c832ba57a3a0b67a14cffa
+    changeNotes: Remove Clear feature - Signature
+
   - sha: fd9aa5090a9248586ec95b12a6ebade0c3a1e39e
     changeNotes: Fix item level discount by multiplying with quantity
 
