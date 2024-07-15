@@ -252,7 +252,7 @@ switch (eventModel.event_name) {
             urlParams.push('AMT' + (i + 1) + '=' + getItemPrice(eventModel.items[i], 'price'));
             urlParams.push('QTY' + (i + 1) + '=' + eventModel.items[i].quantity);
             if (eventModel.items[i].discount > 0) {
-              urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount) * (eventModel.items[i].quantity || 1));
+              urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount * (eventModel.items[i].quantity || 1)));
             }
           }
         }
