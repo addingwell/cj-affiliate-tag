@@ -81,7 +81,14 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Purchase amount",
         "simpleValueType": true,
         "help": "Default to \"value - tax - shipping\""
-      }
+      },
+      {
+        "type": "TEXT",
+        "name": "itemTax",
+        "displayName": "Item price tax rate or key",
+        "defaultValue": "",
+        "help": "If the value is empty, there is no tax on the products. If the value is a number, it is a percentage (between 0% and 100%). The calculation will be: price * (1/(1+value)). If the value is not empty and is not a number, then it retrieves the value of the specified attribute. The calculation will be: price * (1 - itemValueTaxField / price)"
+      },
     ]
   },
   {
@@ -156,16 +163,45 @@ const setCookie = require('setCookie');
 const getCookieValues = require('getCookieValues');
 const parseUrl = require('parseUrl');
 const encodeUriComponent = require('encodeUriComponent');
-
 const eventModel = getAllEventData();
-const API_ENDPOINT = 'https://www.emjcd.com/u';
+const makeNumber = require('makeNumber');
+const logToConsole = require('logToConsole');
 
+const fieldItemTax = data.itemTax;
+
+const API_ENDPOINT = 'https://www.emjcd.com/u';
 const PAGE_VIEW_EVENT = data.pageViewEvent || 'page_view';
 const PURCHASE_EVENT = data.purchaseEvent || 'purchase';
 
 function safeEncodeUriComponent(value) {
   value = value || '';
   return encodeUriComponent(value);
+}
+
+function getItemPrice(item, keyPrice) {
+  let itemPriceCoefficient = 1;
+  if(fieldItemTax) {
+    const itemTaxNumber = makeNumber(fieldItemTax);
+    if(itemTaxNumber) {
+      if(itemTaxNumber > 0 && itemTaxNumber <= 1) {
+        itemPriceCoefficient = 1 / (1 + itemTaxNumber);
+      } else {
+        logToConsole('The tax rate must be between 0 and 1 (or between 0% and 100%). Value sent: ' + itemTaxNumber);
+        data.gtmOnFailure();
+      }
+    } else if(item[fieldItemTax]) {
+      if(item[fieldItemTax] > 0) {
+        if(item[keyPrice] > 0) {
+          itemPriceCoefficient = (1 - item[fieldItemTax] / item[keyPrice]);
+        }
+      } else {
+        logToConsole('The item tax must be a positive number. Value sent: ' + item[fieldItemTax]);
+        data.gtmOnFailure();
+      }
+    }
+  }
+
+  return (item[keyPrice] || 0) * itemPriceCoefficient;
 }
 
 switch (eventModel.event_name) {
@@ -213,10 +249,10 @@ switch (eventModel.event_name) {
         if (eventModel.items) {
           for (let i = 0; i < eventModel.items.length; i++) {
             urlParams.push('ITEM' + (i + 1) + '=' + eventModel.items[i].item_id);
-            urlParams.push('AMT' + (i + 1) + '=' + eventModel.items[i].price || '0');
+            urlParams.push('AMT' + (i + 1) + '=' + getItemPrice(eventModel.items[i], 'price'));
             urlParams.push('QTY' + (i + 1) + '=' + eventModel.items[i].quantity);
             if (eventModel.items[i].discount > 0) {
-              urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount * (eventModel.items[i].quantity || 1)));
+              urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount) * (eventModel.items[i].quantity || 1));
             }
           }
         }
