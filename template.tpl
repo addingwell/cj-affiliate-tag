@@ -81,7 +81,14 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Purchase amount",
         "simpleValueType": true,
         "help": "Default to \"value - tax - shipping\""
-      }
+      },
+      {
+        "type": "TEXT",
+        "name": "orderDateTime",
+        "displayName": "Order Date Time",
+        "simpleValueType": true,
+        "help": "Date and Time in ISO 8601 of the order"
+      },
     ]
   },
   {
@@ -156,6 +163,7 @@ const setCookie = require('setCookie');
 const getCookieValues = require('getCookieValues');
 const parseUrl = require('parseUrl');
 const encodeUriComponent = require('encodeUriComponent');
+const makeString = require('makeString');
 
 const eventModel = getAllEventData();
 const API_ENDPOINT = 'https://www.emjcd.com/u';
@@ -196,12 +204,13 @@ switch (eventModel.event_name) {
     const cjeCookie = getCookieValues('cje');
 
     if (cjeCookie && cjeCookie[0]) {
+        const eventTime = safeEncodeUriComponent(makeString(data.orderDateTime || eventModel.orderDateTime || ''));
         let urlParams = [
           'cid=' + data.cid,
           'type=' + data.actionId,
           'method=S2S',
           'cjevent=' + cjeCookie[0],
-          'eventTime=',
+          'eventTime=' + eventTime,
           'oid=' + safeEncodeUriComponent(eventModel.transaction_id),
           'currency=' + eventModel.currency,
           'coupon=' + safeEncodeUriComponent(eventModel.coupon),
