@@ -84,10 +84,17 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "type": "TEXT",
-        "name": "itemTax",
-        "displayName": "Item price tax rate or key",
+        "name": "itemTaxRate",
+        "displayName": "Fixed item tax rate",
         "defaultValue": "",
-        "help": "If the value is empty, there is no tax on the products. If the value is a number, it is a percentage (between 0% and 100%). The calculation will be: price * (1/(1+value)). If the value is not empty and is not a number, then it retrieves the value of the specified attribute. The calculation will be: price * (1 - itemValueTaxField / price)"
+        "help": "The tax rate percentage of the products (between 0 and 1). The calculation will be: price / (1+itemTaxRate)."
+      },
+      {
+        "type": "TEXT",
+        "name": "itemTaxField",
+        "displayName": "Item tax field",
+        "defaultValue": "",
+        "help": "Retrieves the tax value of the specified item attribute tax field. The calculation will be: price - itemValueTaxField"
       },
     ]
   },
@@ -171,7 +178,6 @@ const makeNumber = require('makeNumber');
 const logToConsole = require('logToConsole');
 
 const eventModel = getAllEventData();
-const fieldItemTax = data.itemTax;
 
 const API_ENDPOINT = 'https://www.emjcd.com/u';
 const PAGE_VIEW_EVENT = data.pageViewEvent || 'page_view';
@@ -184,29 +190,29 @@ function safeEncodeUriComponent(value) {
 
 
 function getItemPrice(item, keyPrice) {
-  let itemPriceCoefficient = 1;
-  if(fieldItemTax) {
-    const itemTaxNumber = makeNumber(fieldItemTax);
-    if(itemTaxNumber) {
-      if(itemTaxNumber > 0 && itemTaxNumber <= 1) {
-        itemPriceCoefficient = 1 / (1 + itemTaxNumber);
-      } else {
-        logToConsole('The tax rate must be between 0 and 1 (or between 0% and 100%). Value sent: ' + itemTaxNumber);
-        data.gtmOnFailure();
-      }
-    } else if(item[fieldItemTax]) {
-      if(item[fieldItemTax] > 0) {
-        if(item[keyPrice] > 0) {
-          itemPriceCoefficient = (1 - item[fieldItemTax] / item[keyPrice]);
-        }
-      } else {
-        logToConsole('The item tax must be a positive number. Value sent: ' + item[fieldItemTax]);
-        data.gtmOnFailure();
-      }
-    }
+  if(!item[keyPrice]) {
+    return 0;
   }
 
-  return (item[keyPrice] || 0) * itemPriceCoefficient;
+  const itemPrice = item[keyPrice];
+
+  if(data.itemTaxRate) {
+    const itemTaxRate = makeNumber(data.itemTaxRate);
+    if(itemTaxRate > 0 && itemTaxRate <= 1) {
+      return itemPrice / (1 + itemTaxRate);
+    } else {
+      logToConsole('The tax rate must be between 0 and 1 (or between 0% and 100%). Value sent: ' + itemTaxRate);
+      data.gtmOnFailure();
+    }
+  } else if(data.itemTaxField) {
+    if(item[data.itemTaxField] > 0) {
+      return (itemPrice - item[data.itemTaxField]);
+    } else {
+      logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxField]);
+      data.gtmOnFailure();
+    }
+  }
+  return itemPrice;
 }
 
 function padTwoNumbers(number) {
