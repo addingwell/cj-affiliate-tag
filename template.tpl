@@ -83,19 +83,36 @@ ___TEMPLATE_PARAMETERS___
         "help": "Default to \"value - tax - shipping\""
       },
       {
-        "type": "TEXT",
-        "name": "itemTaxRate",
-        "displayName": "Fixed item tax rate",
-        "defaultValue": "",
-        "help": "The tax rate percentage of the products (between 0 and 1). The calculation will be: price / (1+itemTaxRate)."
-      },
-      {
-        "type": "TEXT",
-        "name": "itemTaxField",
-        "displayName": "Item tax field",
-        "defaultValue": "",
-        "help": "Retrieves the tax value of the specified item attribute tax field. The calculation will be: price - itemValueTaxField"
-      },
+        "type": "GROUP",
+        "name": "itemTax",
+        "displayName": "Item tax",
+        "groupStyle": "ZIPPY_OPEN",
+        "subParams": [
+          {
+            "type": "SELECT",
+            "name": "itemTaxType",
+            "displayName": "Type",
+            "macrosInSelect": false,
+            "selectItems": [
+              {
+                "value": "itemTaxRate",
+                "displayValue": "Rate"
+              },
+              {
+                "value": "itemTaxField",
+                "displayValue": "Field"
+              }
+            ],
+            "simpleValueType": true
+          },
+          {
+            "type": "TEXT",
+            "name": "itemTaxValue",
+            "displayName": "Value",
+            "simpleValueType": true
+          }
+        ]
+      }
     ]
   },
   {
@@ -196,22 +213,27 @@ function getItemPrice(item, keyPrice) {
 
   const itemPrice = item[keyPrice];
 
-  if(data.itemTaxRate) {
-    const itemTaxRate = makeNumber(data.itemTaxRate);
-    if(itemTaxRate > 0 && itemTaxRate <= 1) {
-      return itemPrice / (1 + itemTaxRate);
-    } else {
-      logToConsole('The tax rate must be between 0 and 1 (or between 0% and 100%). Value sent: ' + itemTaxRate);
-      data.gtmOnFailure();
-    }
-  } else if(data.itemTaxField) {
-    if(item[data.itemTaxField] > 0) {
-      return (itemPrice - item[data.itemTaxField]);
-    } else {
-      logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxField]);
-      data.gtmOnFailure();
-    }
+  if(!data.itemTaxType || !data.itemTaxValue) {
+    return itemPrice;
   }
+
+  switch (data.itemTaxType) {
+    case "itemTaxRate":
+      if(data.itemTaxValue > 0 && data.itemTaxValue <= 100) {
+        return itemPrice / (1 + (data.itemTaxValue / 100));
+      } else {
+        logToConsole('The tax rate must be between 0 and 1 (or between 0% and 100%). Value sent: ' + data.itemTaxValue);
+        data.gtmOnFailure();
+      }
+    case "itemTaxField":
+      if(item[data.itemTaxValue] > 0) {
+        return (itemPrice - item[data.itemTaxValue]);
+      } else {
+        logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxValue]);
+        data.gtmOnFailure();
+      }
+  }
+
   return itemPrice;
 }
 
