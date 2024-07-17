@@ -81,14 +81,7 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Purchase amount",
         "simpleValueType": true,
         "help": "Default to \"value - tax - shipping\""
-      },
-      {
-        "type": "TEXT",
-        "name": "orderDateTime",
-        "displayName": "Order Date Time",
-        "simpleValueType": true,
-        "help": "Date and Time in ISO 8601 of the order"
-      },
+      }
     ]
   },
   {
@@ -164,6 +157,10 @@ const getCookieValues = require('getCookieValues');
 const parseUrl = require('parseUrl');
 const encodeUriComponent = require('encodeUriComponent');
 const makeString = require('makeString');
+const Math = require('Math');
+const Object = require('Object');
+const getTimestampMillis = require('getTimestampMillis');
+const makeNumber = require('makeNumber');
 
 const eventModel = getAllEventData();
 const API_ENDPOINT = 'https://www.emjcd.com/u';
@@ -174,6 +171,80 @@ const PURCHASE_EVENT = data.purchaseEvent || 'purchase';
 function safeEncodeUriComponent(value) {
   value = value || '';
   return encodeUriComponent(value);
+}
+
+function padTwoNumbers(number) {
+  if (number < 10) {
+    return '0' + number;
+  }
+
+  return '' + number;
+}
+
+function padThreeNumbers(number) {
+  if (number < 10) {
+    return '00' + number;
+  }
+
+  if (number < 100) {
+    return '0' + number;
+  }
+
+  return '' + number;
+}
+function parseDate(timestampMillis) {
+  const timestampDays = Math.floor(timestampMillis / 60 / 60 / 24 / 1000);
+  const days = timestampDays + 719468;
+
+  const era = Math.floor((days >= 0 ? days : days - 146096) / 146097);
+  const doe = days - era * 146097;
+  const yoe = Math.floor((doe + (-Math.floor(doe / 1460)) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+  const y = yoe + era * 400;
+  const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+  const mp = Math.floor((5 * doy + 2) / 153);
+  const d = 1 + doy - Math.floor(((153 * mp) + 2) / 5);
+  const m = mp < 10 ? mp + 3 : mp - 9;
+
+  let timeLeft = (timestampMillis - (timestampDays * 60 * 60 * 24 * 1000)) / 1000;
+  const hours = Math.floor(timeLeft / 60 / 60);
+  timeLeft = timeLeft - hours * 60 * 60;
+  const minutes = Math.floor(timeLeft / 60);
+  timeLeft = timeLeft - minutes * 60;
+  const seconds = Math.floor(timeLeft);
+  timeLeft = timeLeft - seconds;
+
+  return {
+    year: y + (m <= 2),
+    month: padTwoNumbers(m),
+    day: padTwoNumbers(d),
+    hours: padTwoNumbers(hours),
+    minutes: padTwoNumbers(minutes),
+    seconds: padTwoNumbers(seconds),
+    ms: padThreeNumbers(Math.floor(timeLeft * 1000)),
+  };
+}
+
+function getFormattedDate(parsedDate, format) {
+  const replaceArray = {
+    'YYYY': parsedDate.year,
+    'MM': parsedDate.month,
+    'DD': parsedDate.day,
+    'hh': parsedDate.hours,
+    'mm': parsedDate.minutes,
+    'ss': parsedDate.seconds,
+    'sss': parsedDate.ms,
+  };
+
+  let finalText = format;
+
+  for (const entry of Object.entries(replaceArray)) {
+    const replace = '%' + entry[0] + '%';
+    while (finalText.indexOf(replace) !== -1) {
+      finalText = finalText.replace('%' + entry[0] + '%', entry[1]);
+    }
+  }
+
+  return finalText;
 }
 
 switch (eventModel.event_name) {
@@ -204,7 +275,10 @@ switch (eventModel.event_name) {
     const cjeCookie = getCookieValues('cje');
 
     if (cjeCookie && cjeCookie[0]) {
-        const eventTime = safeEncodeUriComponent(makeString(data.orderDateTime || eventModel.orderDateTime || ''));
+        const timestampMillis = getTimestampMillis();
+        const parsedDate = parseDate(timestampMillis);
+        const eventTime = getFormattedDate(parsedDate, '%YYYY%-%MM%-%DD%T%hh%:%mm%:%ss%');
+
         let urlParams = [
           'cid=' + data.cid,
           'type=' + data.actionId,
