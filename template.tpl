@@ -163,17 +163,14 @@ const setCookie = require('setCookie');
 const getCookieValues = require('getCookieValues');
 const parseUrl = require('parseUrl');
 const encodeUriComponent = require('encodeUriComponent');
-
 const makeString = require('makeString');
 const Math = require('Math');
 const Object = require('Object');
 const getTimestampMillis = require('getTimestampMillis');
 const makeNumber = require('makeNumber');
-
-const eventModel = getAllEventData();
-const makeNumber = require('makeNumber');
 const logToConsole = require('logToConsole');
 
+const eventModel = getAllEventData();
 const fieldItemTax = data.itemTax;
 
 const API_ENDPOINT = 'https://www.emjcd.com/u';
