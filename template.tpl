@@ -89,18 +89,22 @@ ___TEMPLATE_PARAMETERS___
         "groupStyle": "ZIPPY_OPEN",
         "subParams": [
           {
-            "type": "SELECT",
+            "type": "LABEL",
+            "name": "itemTaxLabel",
+            "displayName": "Fill a value if you want to apply tax on your purchased items.If you select \"Rate\" type then applies a fixed tax rate of all products (Value should be between 0 and 100%).\nIf you select \"Field name\" type then retrieves the value of the corresponding attribute name (filled on the \"Value\" field)"
+          },
+          {
+            "type": "RADIO",
             "name": "itemTaxType",
             "displayName": "Type",
-            "macrosInSelect": false,
-            "selectItems": [
+            "radioItems": [
               {
                 "value": "itemTaxRate",
                 "displayValue": "Rate"
               },
               {
                 "value": "itemTaxField",
-                "displayValue": "Field"
+                "displayValue": "Field name"
               }
             ],
             "simpleValueType": true
