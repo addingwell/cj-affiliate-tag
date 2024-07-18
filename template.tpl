@@ -106,7 +106,7 @@ ___TEMPLATE_PARAMETERS___
           {
             "type": "TEXT",
             "name": "itemTaxRateValue",
-            "displayName": "Tax rate",
+            "displayName": "Item tax rate",
             "simpleValueType": true,
             "valueUnit": "%",
             "defaultValue": 20,
