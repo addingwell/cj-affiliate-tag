@@ -253,8 +253,8 @@ function getItemPrice(item, keyPrice) {
 
   switch (data.itemTaxType) {
     case "rate":
-      if(data.itemTaxRateValue >= 0 && data.itemTaxValue <= 100) {
-        return itemPrice / (1 + (data.itemTaxValue / 100));
+      if(data.itemTaxRateValue >= 0 && data.itemTaxRateValue <= 100) {
+        return itemPrice / (1 + (data.itemTaxRateValue / 100));
       } else {
         logToConsole('The tax rate must be between 0 and 100%. Value sent: ' + data.itemTaxRateValue);
         data.gtmOnFailure();
