@@ -81,6 +81,71 @@ ___TEMPLATE_PARAMETERS___
         "displayName": "Purchase amount",
         "simpleValueType": true,
         "help": "Default to \"value - tax - shipping\""
+      },
+      {
+        "type": "SELECT",
+        "name": "itemTaxType",
+        "displayName": "Item tax type",
+        "selectItems": [
+          {
+            "value": "disabled",
+            "displayValue": "Disabled"
+          },
+          {
+            "value": "rate",
+            "displayValue": "Rate"
+          },
+          {
+            "value": "fieldName",
+            "displayValue": "Field name"
+          }
+        ],
+        "simpleValueType": true,
+        "defaultValue": "disabled",
+        "subParams": [
+          {
+            "type": "TEXT",
+            "name": "itemTaxRateValue",
+            "displayName": "Item tax rate",
+            "simpleValueType": true,
+            "valueUnit": "%",
+            "defaultValue": 20,
+            "enablingConditions": [
+              {
+                "paramName": "itemTaxType",
+                "paramValue": "rate",
+                "type": "EQUALS"
+              }
+            ],
+            "valueValidators": [
+              {
+                "type": "PERCENTAGE"
+              }
+            ],
+            "help": "Fixed tax rate applied for all purchased products items"
+          },
+          {
+            "type": "TEXT",
+            "name": "itemTaxFieldName",
+            "displayName": "Tax field name",
+            "simpleValueType": true,
+            "help": "Apply dynamic tax based on the value appear on the purchased products items. By default items[].tax.",
+            "enablingConditions": [
+              {
+                "paramName": "itemTaxType",
+                "paramValue": "fieldName",
+                "type": "EQUALS"
+              }
+            ],
+            "valueValidators": [
+              {
+                "type": "NON_EMPTY"
+              }
+            ],
+            "defaultValue": "tax"
+          }
+        ],
+        "help": "Choose a tax type you would like to apply to purchased products items"
       }
     ]
   },
@@ -161,16 +226,51 @@ const Math = require('Math');
 const Object = require('Object');
 const getTimestampMillis = require('getTimestampMillis');
 const makeNumber = require('makeNumber');
+const logToConsole = require('logToConsole');
 
 const eventModel = getAllEventData();
-const API_ENDPOINT = 'https://www.emjcd.com/u';
 
+const API_ENDPOINT = 'https://www.emjcd.com/u';
 const PAGE_VIEW_EVENT = data.pageViewEvent || 'page_view';
 const PURCHASE_EVENT = data.purchaseEvent || 'purchase';
 
 function safeEncodeUriComponent(value) {
   value = value || '';
   return encodeUriComponent(value);
+}
+
+
+function getItemPrice(item, keyPrice) {
+  if(!item[keyPrice]) {
+    return 0;
+  }
+
+  const itemPrice = item[keyPrice];
+
+  if(!data.itemTaxType || data.itemTaxType === 'disabled') {
+    return itemPrice;
+  }
+
+  switch (data.itemTaxType) {
+    case "rate":
+      if(data.itemTaxRateValue >= 0 && data.itemTaxRateValue <= 100) {
+        return itemPrice / (1 + (data.itemTaxRateValue / 100));
+      } else {
+        logToConsole('The tax rate must be between 0 and 100%. Value sent: ' + data.itemTaxRateValue);
+        data.gtmOnFailure();
+      }
+      break;
+    case "fieldName":
+      if(item[data.itemTaxFieldName] > 0) {
+        return (itemPrice - item[data.itemTaxFieldName]);
+      } else {
+        logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxFieldName]);
+        data.gtmOnFailure();
+      }
+      break;
+  }
+
+  return itemPrice;
 }
 
 function padTwoNumbers(number) {
@@ -192,6 +292,7 @@ function padThreeNumbers(number) {
 
   return '' + number;
 }
+
 function parseDate(timestampMillis) {
   const timestampDays = Math.floor(timestampMillis / 60 / 60 / 24 / 1000);
   const days = timestampDays + 719468;
@@ -296,7 +397,7 @@ switch (eventModel.event_name) {
         if (eventModel.items) {
           for (let i = 0; i < eventModel.items.length; i++) {
             urlParams.push('ITEM' + (i + 1) + '=' + eventModel.items[i].item_id);
-            urlParams.push('AMT' + (i + 1) + '=' + eventModel.items[i].price || '0');
+            urlParams.push('AMT' + (i + 1) + '=' + getItemPrice(eventModel.items[i], 'price'));
             urlParams.push('QTY' + (i + 1) + '=' + eventModel.items[i].quantity);
             if (eventModel.items[i].discount > 0) {
               urlParams.push('DCNT' + (i + 1) + '=' + (eventModel.items[i].discount * (eventModel.items[i].quantity || 1)));
