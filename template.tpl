@@ -259,6 +259,7 @@ function getItemPrice(item, keyPrice) {
         logToConsole('The tax rate must be between 0 and 100%. Value sent: ' + data.itemTaxRateValue);
         data.gtmOnFailure();
       }
+      break;
     case "fieldName":
       if(item[data.itemTaxFieldName] > 0) {
         return (itemPrice - item[data.itemTaxFieldName]);
@@ -266,6 +267,7 @@ function getItemPrice(item, keyPrice) {
         logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxFieldName]);
         data.gtmOnFailure();
       }
+      break;
   }
 
   return itemPrice;
