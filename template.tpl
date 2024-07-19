@@ -389,8 +389,8 @@ switch (eventModel.event_name) {
           'oid=' + safeEncodeUriComponent(eventModel.transaction_id),
           'currency=' + eventModel.currency,
           'coupon=' + safeEncodeUriComponent(eventModel.coupon),
-          (eventModel.discount > 0) ? 'discount=' + eventModel.discount : '',
-          'amount=' + data.purchaseAmount ? data.purchaseAmount : ((eventModel.value - (eventModel.tax || 0)) - (eventModel.shipping || 0)),
+          (eventModel.discount > 0) ? 'discount=' + makeString(eventModel.discount) : '',
+          'amount=' + makeString(data.purchaseAmount ? data.purchaseAmount : ((eventModel.value - (eventModel.tax || 0)) - (eventModel.shipping || 0))),
           'trackingSource=addingwell'
         ];
 
