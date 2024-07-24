@@ -241,7 +241,7 @@ function safeEncodeUriComponent(value) {
 
 
 function getItemPrice(item, keyPrice) {
-  if(!item[keyPrice]) {
+  if(item[keyPrice] === undefined || !item[keyPrice]) {
     return 0;
   }
 
@@ -257,19 +257,17 @@ function getItemPrice(item, keyPrice) {
         return itemPrice / (1 + (data.itemTaxRateValue / 100));
       } else {
         logToConsole('The tax rate must be between 0 and 100%. Value sent: ' + data.itemTaxRateValue);
-        data.gtmOnFailure();
+        return itemPrice;
       }
-      break;
     case "fieldName":
-      if(item[data.itemTaxFieldName] > 0) {
-        return (itemPrice - item[data.itemTaxFieldName]);
+      const itemTaxFieldName = data.itemTaxFieldName;
+      if(itemTaxFieldName && item[itemTaxFieldName] !== undefined && item[itemTaxFieldName] > 0) {
+        return (itemPrice - item[itemTaxFieldName]);
       } else {
-        logToConsole('The item tax must be a positive number. Value sent: ' + item[data.itemTaxFieldName]);
-        data.gtmOnFailure();
+        logToConsole('The item tax must be a positive number);
+        return itemPrice;
       }
-      break;
   }
-
   return itemPrice;
 }
 
