@@ -17,19 +17,14 @@ documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/READM
 versions:
   - sha: 323c97dfb4e6fe4250440b0ba4be5a1198517aa0
     changeNotes: Fix javascript errors
-
   - sha: b4bf8b3ce2c45fe72f3243dd7ced73a4671397d3
     changeNotes: 1.3.1
-
   - sha: fed99f56cfbc09f4fe7eb05901abc9a4104aab95
     changeNotes: Add eventTime value, and allow to set tax on item
-
   - sha: 1a4b68826c05ddcf33c832ba57a3a0b67a14cffa
     changeNotes: Remove Clear feature - Signature
-
   - sha: fd9aa5090a9248586ec95b12a6ebade0c3a1e39e
     changeNotes: Fix item level discount by multiplying with quantity
-
   - sha: befdeb32d4a462d5ca9ea5969c9d438b7fc19c64
     changeNotes: Add custom parameters on conversion
   - sha: d5ca433eb11fbe701e5401df5552a3e9166b3730
