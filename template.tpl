@@ -259,14 +259,16 @@ function getItemPrice(item, keyPrice) {
         logToConsole('The tax rate must be between 0 and 100%. Value sent: ' + data.itemTaxRateValue);
         return itemPrice;
       }
+      break;
     case "fieldName":
       const itemTaxFieldName = data.itemTaxFieldName;
       if(itemTaxFieldName && item[itemTaxFieldName] !== undefined && item[itemTaxFieldName] > 0) {
         return (itemPrice - item[itemTaxFieldName]);
       } else {
-        logToConsole('The item tax must be a positive number);
+        logToConsole('The item tax must be a positive number');
         return itemPrice;
       }
+      break;
   }
   return itemPrice;
 }
