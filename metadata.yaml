@@ -15,6 +15,9 @@
 homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
+  - sha: 71969f150655fa94fd0164f85a07c280a1381ae2
+    changeNotes: Fix: add missing permission
+
   - sha: 019c3b0687c1c456c8e9aea2eaab96ea429c28e0
     changeNotes: Fix import .tpl errors
 
