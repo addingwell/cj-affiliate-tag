@@ -16,14 +16,6 @@ homepage: "https://www.addingwell.com"
 documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
 versions:
   - sha: 71969f150655fa94fd0164f85a07c280a1381ae2
-    changeNotes: Fix: add missing permission
-  - sha: 019c3b0687c1c456c8e9aea2eaab96ea429c28e0
-    changeNotes: Fix import .tpl errors
-  - sha: 323c97dfb4e6fe4250440b0ba4be5a1198517aa0
-    changeNotes: Fix javascript errors
-  - sha: b4bf8b3ce2c45fe72f3243dd7ced73a4671397d3
-    changeNotes: 1.3.1
-  - sha: fed99f56cfbc09f4fe7eb05901abc9a4104aab95
     changeNotes: Add eventTime value, and allow to set tax on item
   - sha: 1a4b68826c05ddcf33c832ba57a3a0b67a14cffa
     changeNotes: Remove Clear feature - Signature
