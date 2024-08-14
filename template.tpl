@@ -1,11 +1,3 @@
-﻿﻿___TERMS_OF_SERVICE___
-
-By creating or modifying this file you agree to Google Tag Manager's Community
-Template Gallery Developer Terms of Service available at
-https://developers.google.com/tag-manager/gallery-tos (or such other URL as
-Google may provide), as modified from time to time.
-
-
 ___INFO___
 
 {
@@ -56,18 +48,6 @@ ___TEMPLATE_PARAMETERS___
       }
     ],
     "help": "This is also called an Action ID in the Account Manager that is a static value provided by CJ. Each action will have a unique TYPE value."
-  },
-  {
-    "type": "TEXT",
-    "name": "domain",
-    "displayName": "Cookie domain",
-    "simpleValueType": true,
-    "valueValidators": [
-      {
-        "type": "NON_EMPTY"
-      }
-    ],
-    "help": "The cookie domain must be the top level domain (.example.com)."
   },
   {
     "type": "GROUP",
@@ -361,7 +341,7 @@ switch (eventModel.event_name) {
     }
     if (value) {
         const options = {
-            domain: data.domain,
+            domain: 'auto',
             path: '/',
             secure: true,
             httpOnly: false,
@@ -616,4 +596,5 @@ scenarios: []
 ___NOTES___
 
 Created on 2/15/2022, 16:06:45
+
 
