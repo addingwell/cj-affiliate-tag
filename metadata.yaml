@@ -1,6 +1,8 @@
 homepage: "https://www.addingwell.com"
-documentation: "https://github.com/addingwell/cj-affiliate-tag/blob/master/README.md"
+documentation: "https://docs.addingwell.com/cj-affiliate/import-cj-affiliate-tag-google-tag-manager"
 versions:
+  - sha: 8713f566b11a3922508846953162194043997f6f
+    changeNotes: Update readme
   - sha: db2ac1449d72450691765d943d3d093d2a545bad
     changeNotes: Fix domain issue on cookie
   - sha: 71969f150655fa94fd0164f85a07c280a1381ae2
